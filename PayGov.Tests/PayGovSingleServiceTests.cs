@@ -29,10 +29,9 @@ namespace PayGov.Tests
             _cert = new X509Certificate2(certData, appSettings["CertificatePassword"]);
         }
 
-        [Test]
-        public async Task ProcessPlasticCardSale_2002_SuccessulSubmissionOfSale()
+        public PlasticCardSaleRequest BuildDefaultRequest()
         {
-            var soap = new PlasticCardSaleRequest()
+            return new PlasticCardSaleRequest()
             {
                 AgencyId = _agencyId,
                 ApplicationId = _applicationId,
@@ -54,16 +53,35 @@ namespace PayGov.Tests
                     BillingState = "VA",
                     BillingZip = "20001",
                     BillingCountry = "840",
-                    AccountHolderEmailAddress = "gaiazov@gmail.com",
+                    AccountHolderEmailAddress = "test@test.com",
                     CustomFields = new PayGovCustomFields()
                     {
                         CustomField1 = "Hello World!"
                     }
                 }
             };
+        }
 
+        [Test]
+        public async Task ProcessPlasticCardSale_4000_CannotConnectToProduction()
+        {
+            var processor = new PayGovSingleService("https://tcs.pay.gov/tcscollections/services/TCSSingleService", _cert);
+            var request = BuildDefaultRequest();
+
+            Func<Task> act = async () => await processor.ProcessPlasticCardSale(request);
+
+            act.ShouldThrow<ApplicationException>()
+                .WithMessage("Error establishing connection.")
+                .WithInnerMessage("The request was aborted: Could not create SSL/TLS secure channel.");
+
+        }
+
+        [Test]
+        public async Task ProcessPlasticCardSale_2002_SuccessulSubmissionOfSale()
+        {
             var processor = new PayGovSingleService(_url, _cert);
-            var response = await processor.ProcessPlasticCardSale(soap);
+            var request = BuildDefaultRequest();
+            var response = await processor.ProcessPlasticCardSale(request);
 
             response.Should().NotBeNull();
             response.Response.Should().NotBeNull();
@@ -80,38 +98,10 @@ namespace PayGov.Tests
         [Test]
         public async Task ProcessPlasticCardSale_4051_AgencyTrackingId_NotUnique()
         {
-            var soap = new PlasticCardSaleRequest()
-            {
-                AgencyId = _agencyId,
-                ApplicationId = _applicationId,
-                Request = new PlasticCardSale()
-                {
-                    AgencyTrackingId = "12345678",
-                    OrderId = "85869603",
-
-                    TransactionAmount = 20.00m,
-                    AccountNumber = "5555555555555557",
-                    CreditCardExpirationDate = "2020-10",
-                    FirstName = "Leonid",
-                    MiddleInitial = "",
-                    LastName = "Gaiazov",
-                    CardSecurityCode = "111",
-                    BillingAddress = "123 Test Street",
-                    BillingAddress2 = "Apt 10",
-                    BillingCity = "City",
-                    BillingState = "VA",
-                    BillingZip = "20001",
-                    BillingCountry = "840",
-                    AccountHolderEmailAddress = "gaiazov@gmail.com",
-                    CustomFields = new PayGovCustomFields()
-                    {
-                        CustomField1 = "Hello World!"
-                    }
-                }
-            };
-
+            var request = BuildDefaultRequest();
+            request.Request.AgencyTrackingId = "12345678";
             var processor = new PayGovSingleService(_url, _cert);
-            var response = await processor.ProcessPlasticCardSale(soap);
+            var response = await processor.ProcessPlasticCardSale(request);
 
             response.Should().NotBeNull();
             response.Response.Should().NotBeNull();
@@ -128,38 +118,12 @@ namespace PayGov.Tests
         [Test]
         public async Task ProcessPlasticCardSale_4019_NoAgencyExists()
         {
-            var soap = new PlasticCardSaleRequest()
-            {
-                AgencyId = "1234",
-                ApplicationId = "DOESNOTEXIST",
-                Request = new PlasticCardSale()
-                {
-                    AgencyTrackingId = "12345678",
-                    OrderId = "85869603",
-
-                    TransactionAmount = 20.00m,
-                    AccountNumber = "5555555555555557",
-                    CreditCardExpirationDate = "2020-10",
-                    FirstName = "Leonid",
-                    MiddleInitial = "",
-                    LastName = "Gaiazov",
-                    CardSecurityCode = "111",
-                    BillingAddress = "123 Test Street",
-                    BillingAddress2 = "Apt 10",
-                    BillingCity = "City",
-                    BillingState = "VA",
-                    BillingZip = "20001",
-                    BillingCountry = "840",
-                    AccountHolderEmailAddress = "gaiazov@gmail.com",
-                    CustomFields = new PayGovCustomFields()
-                    {
-                        CustomField1 = "Hello World!"
-                    }
-                }
-            };
+            var request = BuildDefaultRequest();
+            request.AgencyId = "1234";
+            request.ApplicationId = "DOESNOTEXIST";
 
             var processor = new PayGovSingleService(_url, _cert);
-            var response = await processor.ProcessPlasticCardSale(soap);
+            var response = await processor.ProcessPlasticCardSale(request);
 
             response.Should().NotBeNull();
             response.Response.Should().NotBeNull();

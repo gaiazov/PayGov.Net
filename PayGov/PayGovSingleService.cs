@@ -46,24 +46,35 @@ namespace PayGov
             }
             catch (WebException ex)
             {
-                response = ex.Response;
-                using (var rd = new StreamReader(response.GetResponseStream()))
+                var errorResponse = ex.Response;
+                if (errorResponse == null)
+                {
+                    throw new ApplicationException("Error establishing connection.", ex);
+                }
+
+                var errorStream = errorResponse.GetResponseStream();
+                if (errorStream == null)
+                {
+                    throw new ApplicationException("Error establishing connection.", ex);
+                }
+
+                using (var rd = new StreamReader(errorStream))
                 {
                     var soapResult = rd.ReadToEnd();
                     Console.WriteLine(soapResult);
                 }
-                throw new ApplicationException("Error occured in Pay.Gov", ex);
+                throw new ApplicationException("Error occured in Pay.Gov.", ex);
             }
 
             if (response == null)
             {
-                throw new ApplicationException("Received null response from Pay.Gov");
+                throw new ApplicationException("Received bad response from Pay.Gov.");
             }
 
             var responseStream = response.GetResponseStream();
             if (responseStream == null)
             {
-                throw new ApplicationException("Reponse Stream is null");
+                throw new ApplicationException("Reponse Stream is null.");
             }
 
             using (var rd = new StreamReader(responseStream))
@@ -72,7 +83,7 @@ namespace PayGov
                 var soapResponse = (SoapWrapper)deSerializer.Deserialize(rd);
                 if (soapResponse == null)
                 {
-                    throw new ApplicationException("Response is not a SoapWrapper object");
+                    throw new ApplicationException("Response is not a SoapWrapper object.");
                 }
                 var saleResponse = (PlasticCardSaleResponse)soapResponse.Body[0];
                 response.Dispose();
@@ -139,6 +150,10 @@ namespace PayGov
                 ns.Add("s11", "http://schemas.xmlsoap.org/soap/envelope/");
                 var xser = new XmlSerializer(typeof(T));
                 xser.Serialize(stream, soap, ns);
+
+#if DEBUG
+                xser.Serialize(Console.Out, soap, ns);
+#endif
             }
         }
         #endregion
