@@ -77,6 +77,10 @@ namespace PayGov.Message
         // Response fields
         ////////////////////////////
 
+        // <tcs:paygov_tracking_id>250859P5</tcs:paygov_tracking_id>
+        [XmlElement("paygov_tracking_id")]
+        public string PayGovTrackingId;
+
         // <tcs:masked_account_number>************5557</tcs:masked_account_number>
         [XmlElement("masked_account_number")]
         public string MaskedAccountNumber;
