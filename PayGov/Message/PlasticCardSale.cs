@@ -11,7 +11,7 @@ namespace PayGov.Message
 
         // <transaction_amount>20.0000</transaction_amount>
         [XmlElement("transaction_amount")]
-        public string TransactionAmount;
+        public decimal TransactionAmount;
 
         // <account_number>5555555555555557</account_number>
         [XmlElement("account_number")]

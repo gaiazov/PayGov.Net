@@ -39,7 +39,7 @@ namespace PayGov.Tests
                     AgencyTrackingId = "12345678",
                     OrderId = "85869603",
 
-                    TransactionAmount = "20.0000",
+                    TransactionAmount = 20.00m,
                     AccountNumber = "5555555555555557",
                     CreditCardExpirationDate = "2020-10",
                     FirstName = "Leonid",
@@ -85,7 +85,7 @@ namespace PayGov.Tests
                     AgencyTrackingId = "12345678",
                     OrderId = "85869603",
 
-                    TransactionAmount = "20.0000",
+                    TransactionAmount = 20.00m,
                     AccountNumber = "5555555555555557",
                     CreditCardExpirationDate = "2020-10",
                     FirstName = "Leonid",
