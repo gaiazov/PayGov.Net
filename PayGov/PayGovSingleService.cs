@@ -17,13 +17,13 @@ namespace PayGov
         {
             if (url == null)
             {
-                throw new ArgumentNullException("url", "url cannot be null");
+                throw new ArgumentNullException(nameof(url), "url cannot be null");
             }
 
             if (!url.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) &&
                 !url.StartsWith("https://", StringComparison.CurrentCultureIgnoreCase))
             {
-                throw new ArgumentException("url must start with http:// or https://");
+                throw new ArgumentException($"{nameof(url)} must start with http:// or https://");
             }
 
             _url = url;

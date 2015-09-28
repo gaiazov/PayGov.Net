@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+
 using FluentAssertions;
 using NUnit.Framework;
+
 using PayGov.Message;
 
 namespace PayGov.Tests
@@ -63,7 +65,7 @@ namespace PayGov.Tests
         }
 
         [Test]
-        public async Task ProcessPlasticCardSale_4000_CannotConnectToProduction()
+        public void ProcessPlasticCardSale_4000_CannotConnectToProduction()
         {
             var processor = new PayGovSingleService("https://tcs.pay.gov/tcscollections/services/TCSSingleService", _cert);
             var request = BuildDefaultRequest();
@@ -73,7 +75,6 @@ namespace PayGov.Tests
             act.ShouldThrow<ApplicationException>()
                 .WithMessage("Error establishing connection.")
                 .WithInnerMessage("The request was aborted: Could not create SSL/TLS secure channel.");
-
         }
 
         [Test]
@@ -81,6 +82,44 @@ namespace PayGov.Tests
         {
             var processor = new PayGovSingleService(_url, _cert);
             var request = BuildDefaultRequest();
+            var response = await processor.ProcessPlasticCardSale(request);
+
+            response.Should().NotBeNull();
+            response.Response.Should().NotBeNull();
+
+            var saleResponse = response.Response;
+
+            saleResponse.ReturnCode.Should().NotBeNullOrEmpty().And.Be("2002");
+            saleResponse.ReturnDetail.Should()
+                .NotBeNullOrEmpty()
+                .And.Contain("Successful submission").And.Contain("PC Sale");
+            saleResponse.PayGovTrackingId.Should().NotBeNullOrEmpty();
+        }
+
+        [Test]
+        public async Task ProcessPlasticCardSale_With_ClassificationData_Should_Return_2002()
+        {
+            var processor = new PayGovSingleService(_url, _cert);
+            var request = BuildDefaultRequest();
+
+            request.Request.Classification.Add(new ClassificationData
+            {
+                Amount = 0, //request.Request.TransactionAmount - 5,
+                ClassificationId = "0" //"TAS BETC 1"
+            });
+
+            request.Request.Classification.Add(new ClassificationData
+            {
+                Amount = 0, //5.00m,
+                ClassificationId = "0"//"TAS BETC 2"
+            });
+
+            request.Request.Classification.Add(new ClassificationData
+            {
+                Amount = 0, //0.00m,
+                ClassificationId = "0"//"TAS BETC 3"
+            });
+
             var response = await processor.ProcessPlasticCardSale(request);
 
             response.Should().NotBeNull();

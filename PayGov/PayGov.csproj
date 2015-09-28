@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Message\ClassificationData.cs" />
     <Compile Include="Message\PayGovCustomFields.cs" />
     <Compile Include="Message\PlasticCardSale.cs" />
     <Compile Include="Message\PlasticCardSaleRequest.cs" />

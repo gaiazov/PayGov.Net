@@ -1,4 +1,7 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace PayGov.Message
 {
@@ -69,6 +72,10 @@ namespace PayGov.Message
         [XmlElement("custom_fields")]
         public PayGovCustomFields CustomFields = new PayGovCustomFields();
 
+        // <classification>...</classification>
+        [XmlArray("classification")]
+        public List<ClassificationData> Classification = new List<ClassificationData>();
+        
         // <account_holder_email_address>gaiazov@gmail.com</account_holder_email_address>
         [XmlElement("account_holder_email_address")]
         public string AccountHolderEmailAddress;
@@ -128,6 +135,12 @@ namespace PayGov.Message
         // <tcs:remaining_balance xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
         [XmlElement("remaining_balance")]
         public string RemainingBalance;
+
+        [EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
+        public bool ShouldSerializeClassification()
+        {
+            return Classification != null && Classification.Any();
+        }
     }
 
 }
