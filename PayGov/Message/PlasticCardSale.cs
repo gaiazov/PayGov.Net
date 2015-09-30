@@ -71,14 +71,14 @@ namespace PayGov.Message
         // <custom_fields />
         [XmlElement("custom_fields")]
         public PayGovCustomFields CustomFields = new PayGovCustomFields();
-
-        // <classification>...</classification>
-        [XmlArray("classification")]
-        public List<ClassificationData> Classification = new List<ClassificationData>();
         
         // <account_holder_email_address>gaiazov@gmail.com</account_holder_email_address>
         [XmlElement("account_holder_email_address")]
         public string AccountHolderEmailAddress;
+
+        // <classification>...</classification>
+        [XmlArray("classification")]
+        public List<ClassificationData> Classification = new List<ClassificationData>();
 
         ////////////////////////////
         // Response fields
